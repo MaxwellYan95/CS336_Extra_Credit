@@ -1,0 +1,89 @@
+/* Note: 'body' styles moved to index.css */
+
+.App {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+h1 { text-align: center; color: #333; }
+
+.input-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+input {
+  width: 60%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px 0 0 4px;
+  font-size: 16px;
+}
+
+button {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+button:hover { background-color: #0056b3; }
+button:disabled { background-color: #ccc; }
+
+.output-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.full-width { grid-column: span 2; }
+
+.code-block {
+  background: #2d2d2d;
+  color: #5ce1e6;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f8f9fa;
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+}
+
+th:hover { background-color: #e9ecef; }
+tr:hover { background-color: #f1f1f1; }
+
+.error { color: #dc3545; font-size: 0.9em; margin-top: 10px; }
+.error-message { color: #666; font-style: italic; }
