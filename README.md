@@ -24,3 +24,6 @@ Change variables in .py files
 1) Open 2 separate terminals
 2) In the 1st terminal, run these commands: "cd Backend" and "python database_llm.py"
 3) In the 2nd terminal, run these commands: "cd Frontend" and "npm start"
+
+# Troubleshoot Note
+If you have a port number ERROR, type these commands: "sudo lsof -i :5000" and "kill -9 YOUR_PID"
