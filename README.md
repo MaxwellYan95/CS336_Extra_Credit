@@ -1,46 +1,26 @@
-# Getting Started with Create React App
+# How to set up program?
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Type these commands in the local machine terminal
+1) python3.11 -m venv .venv
+2) source .venv/bin/activate
+3) cd Backend
+4) pip install -r packages.txt
 
-## Available Scripts
+Move ilab_script_extra.py to your ilab machine
+1) ilab_script_extra.py is in Backend folder
 
-In the project directory, you can run:
+Type these commands in the ilab machine terminal
+1) Go to the directory where you stored the ilab_script_extra.py
+2) python3.11 -m venv .venv
+3) source .venv/bin/activate
+4) pip install pandas sqlalchemy psycopg2-binary
 
-### `npm start`
+Change variables in .py files
+1) Go to the ilab_script_extra.py file in the ilab machine and change these variables --> DB_USER, DB_PASS, DB_HOST, DB_NAME. Make sure you get the connection of your ilab database.
+2) Go to the database_llm.py file in the local machine and change these variables --> REMOTE_SCRIPT_PATH, ENV_ACTIVATE_PATH. REMOTE_SCRIPT_PATH is the path of the ilab_script_extra.py in your ilab machine. ENV_ACTIVATE_PATH is the path of the new environment you created in your ilab machine. 
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+# How to run the program?
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+1) Open 2 separate terminals
+2) In the 1st terminal, run these commands: "cd Backend" and "python database_llm.py"
+3) In the 2nd terminal, run these commands: "cd Frontend" and "npm start"
