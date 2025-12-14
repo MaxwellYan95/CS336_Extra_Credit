@@ -1,30 +1,59 @@
 import React, { useState, FormEvent } from 'react';
 import './App.css';
-import { ApiResponse, TableRow, SortConfig } from './types';
+import { ApiResponse, TableRow, SortConfig, Credentials } from './types';
+import Login from './Login'; // Import the new Login component
 
 function App() {
-  // Application State
+  // --- Auth State ---
+  // If null, show Login page. If set, show Main App.
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
+
+  // --- Application State ---
   const [question, setQuestion] = useState<string>('');
   const [result, setResult] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
-  // Handle Form Submission
+  // --- Handlers ---
+
+  const handleLogin = (user: string, pass: string) => {
+    // This triggers the switch to the "original \ask page" view
+    setCredentials({ user, pass });
+  };
+
+  const handleLogout = () => {
+    setCredentials(null); // Switch back to Login view
+    setResult(null);      // Clear previous results
+    setQuestion('');
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!credentials) return; // Should not happen if UI is correct
+
     setLoading(true);
     setResult(null);
-    setSortConfig(null); // Reset sort settings when a new query is run
+    setSortConfig(null);
 
     try {
       const response = await fetch('http://localhost:5000/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ 
+          question, 
+          ilab_user: credentials.user, 
+          ilab_pass: credentials.pass 
+        }),
       });
       
       const data: ApiResponse = await response.json();
-      setResult(data);
+      
+      if (response.status === 401) {
+          alert("Authentication failed. Checking credentials...");
+          setCredentials(null); // Log out if credentials were bad
+      } else {
+          setResult(data);
+      }
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to connect to backend");
@@ -32,7 +61,7 @@ function App() {
     setLoading(false);
   };
 
-  // Sorting Logic for the Interactive Table
+  // Sorting Logic
   const handleSort = (key: string) => {
     let direction: 'ascending' | 'descending' = 'ascending';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -42,7 +71,6 @@ function App() {
   };
 
   const getSortedData = (): TableRow[] => {
-    // Safety check: ensure table_data is an array before trying to sort it
     if (!result || !Array.isArray(result.table_data)) return [];
 
     let sortableItems = [...result.table_data];
@@ -50,11 +78,9 @@ function App() {
       sortableItems.sort((a, b) => {
         const valA = a[sortConfig.key];
         const valB = b[sortConfig.key];
-
         if (valA === valB) return 0;
         if (valA === null) return 1;
         if (valB === null) return -1;
-
         if (valA < valB) return sortConfig.direction === 'ascending' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
         return 0;
@@ -65,13 +91,26 @@ function App() {
 
   const sortedData = getSortedData();
 
+  // --- View Switching Logic ---
+
+  // 1. Show Login Page if no credentials
+  if (!credentials) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  // 2. Show Main Query Page if logged in
   return (
     <div className="App">
-      <header>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
         <h1>SQL AI Assistant</h1>
+        <div style={{ fontSize: '0.9em' }}>
+          <span>Logged in as: <strong>{credentials.user}</strong> </span>
+          <button onClick={handleLogout} style={{ marginLeft: '10px', padding: '5px 10px' }}>
+            Logout
+          </button>
+        </div>
       </header>
       
-      {/* 1. Input Section  */}
       <div className="input-container">
         <form onSubmit={handleSubmit}>
           <input
@@ -89,28 +128,23 @@ function App() {
 
       {result && (
         <div className="output-container">
-          {/* 2. Output Box: Original Query  */}
           <div className="box">
             <h3>Original Question</h3>
             <p>{result.original_question}</p>
           </div>
 
-          {/* 3. Output Box: Generated SQL (LLM Output)  */}
           <div className="box">
             <h3>Generated SQL</h3>
             <div className="code-block">{result.generated_sql}</div>
           </div>
 
-          {/* 4. Output Box: Interactive Table [cite: 7, 8, 10] */}
           <div className="box full-width">
             <h3>Result Table</h3>
-            
             {Array.isArray(result.table_data) && result.table_data.length > 0 ? (
               <div className="table-wrapper">
                 <table>
                   <thead>
                     <tr>
-                      {/* Dynamically generate headers from the first row keys */}
                       {Object.keys(result.table_data[0]).map((key) => (
                         <th key={key} onClick={() => handleSort(key)}>
                           {key} {sortConfig?.key === key ? (sortConfig.direction === 'ascending' ? '▲' : '▼') : ''}
@@ -130,7 +164,6 @@ function App() {
                 </table>
               </div>
             ) : (
-              // Error handling if the query returned no data or an error
               <div className="error-message">
                 <p>
                   {Array.isArray(result.table_data) 
@@ -141,7 +174,6 @@ function App() {
               </div>
             )}
             
-            {/* Display SSH errors if any */}
             {result.ssh_error && (
                <p className="error">Remote Log: {result.ssh_error}</p>
             )}

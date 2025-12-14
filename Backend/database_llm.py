@@ -7,12 +7,11 @@ from huggingface_hub import hf_hub_download
 import json
 
 app = Flask(__name__)
-CORS(app)  # Allow React to talk to this server
+CORS(app)
 
 # --- Configuration ---
 ILAB_HOST = "ilab1.cs.rutgers.edu"
-ILAB_USER = "my463"  # Fill this in or use env vars
-ILAB_PASS = "HappyFish2025!!" # Fill this in or use env vars
+# Note: User/Pass are now dynamic, removed hardcoded globals
 REMOTE_SCRIPT_PATH = "/common/home/my463/cs336_Data/project3/ilab_script_extra.py"
 ENV_ACTIVATE_PATH = "/common/home/my463/cs336_Data/project3/ai_env/bin/activate"
 
@@ -29,9 +28,7 @@ llm = Llama(
     verbose=False
 )
 
-# Load Schema Context
 def get_schema_context():
-    # Simplified for the example - ensure these files exist locally in the backend folder
     try:
         with open("Database.sql", 'r') as f: db = f.read()
         with open("FeedValues.sql", 'r') as f: feed = f.read()
@@ -52,13 +49,16 @@ def generate_sql(question):
     output = llm(full_prompt, max_tokens=400, stop=["<|im_end|>", ";"], echo=False)
     return output['choices'][0]['text'].strip().replace("```sql", "").replace("```", "").strip()
 
-def execute_on_ilab(sql_query):
+# Updated to accept dynamic credentials
+def execute_on_ilab(sql_query, user, password):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ILAB_HOST, username=ILAB_USER, password=ILAB_PASS)
+        # Connect using provided credentials
+        ssh.connect(ILAB_HOST, username=user, password=password)
         
         safe_query = sql_query.replace('"', '\\"')
+        # Note: Ensure the remote script path is accessible to the logged-in user
         full_command = f'source {ENV_ACTIVATE_PATH} && python3 {REMOTE_SCRIPT_PATH} "{safe_query}"'
         
         stdin, stdout, stderr = ssh.exec_command(full_command)
@@ -66,9 +66,7 @@ def execute_on_ilab(sql_query):
         error_str = stderr.read().decode().strip()
         ssh.close()
 
-        # Try to parse the remote output as JSON
         try:
-            # Find the JSON list in the output (in case of other print statements)
             start_idx = result_str.find('[')
             end_idx = result_str.rfind(']') + 1
             if start_idx != -1 and end_idx != -1:
@@ -77,7 +75,7 @@ def execute_on_ilab(sql_query):
             elif "error" in result_str.lower():
                  return {"error": result_str}, error_str
             else:
-                 return [], error_str # Empty result
+                 return [], error_str 
         except json.JSONDecodeError:
             return {"error": "Failed to parse remote JSON", "raw": result_str}, error_str
 
@@ -89,14 +87,19 @@ def ask():
     data = request.json
     question = data.get('question')
     
+    # Extract credentials from request
+    ilab_user = data.get('ilab_user')
+    ilab_pass = data.get('ilab_pass')
+    
     if not question:
         return jsonify({"error": "No question provided"}), 400
+    if not ilab_user or not ilab_pass:
+        return jsonify({"error": "Missing iLab credentials"}), 401
 
-    # 1. Generate SQL
     sql_query = generate_sql(question)
     
-    # 2. Execute SQL
-    table_data, ssh_error = execute_on_ilab(sql_query)
+    # Pass credentials to execution function
+    table_data, ssh_error = execute_on_ilab(sql_query, ilab_user, ilab_pass)
     
     return jsonify({
         "original_question": question,

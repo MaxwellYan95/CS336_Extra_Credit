@@ -1,5 +1,6 @@
+// types.ts
+
 // Define the shape of a single row from your database
-// We use a flexible signature because the columns depend on the query.
 export interface TableRow {
   [key: string]: string | number | null | boolean;
 }
@@ -8,7 +9,7 @@ export interface TableRow {
 export interface ApiResponse {
   original_question: string;
   generated_sql: string;
-  table_data: TableRow[] | { error: string }; // Can be an array of data OR an error object
+  table_data: TableRow[] | { error: string };
   ssh_error: string;
 }
 
@@ -16,4 +17,10 @@ export interface ApiResponse {
 export interface SortConfig {
   key: string;
   direction: 'ascending' | 'descending';
+}
+
+// New: Define credentials structure
+export interface Credentials {
+  user: string;
+  pass: string;
 }
