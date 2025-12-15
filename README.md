@@ -27,3 +27,10 @@ Change variables in .py files
 
 # Troubleshoot Note
 If you have a port number ERROR, type these commands: "sudo lsof -i :5000" and "kill -9 YOUR_PID"
+
+# Transcript of GEMINI Chats
+1) I want a Python program to be displayed on a working front end. Right now, I’m using React as my frontend. My Python program is a LLM that takes a regular sentence, converts that sentence into an SQL query, extracts data from an SQL database, and then returns back a series that represents a table that came from the SQL query. In the frontend, I want a textbox that the user can use to enter the input. Additionally, I want an interactive table that displays the final result. Show me all of the files that I need. 
+
+2) I want to create a separate login page. This page will have 2 text boxes which will fill in the values for ILAB_PASS and ILAB_USER from database.py. Give me the typescript code to achieve that. 
+
+3) I realized that sometimes the table display would have too many columns which would make the table super horizontally wide. I want to have a scrollbar. I want the scrollbar to be located on top of the table. Additionally, I want a vertical scrollbar because the table would sometimes have a lot of rows. 
